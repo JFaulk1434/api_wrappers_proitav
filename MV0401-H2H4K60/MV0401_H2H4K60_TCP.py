@@ -1,4 +1,4 @@
-from ProITAV.api_wrappers.MV0401_H2H4K60 import MV0401_H2H4K60
+from MV0401_H2H4K60 import MV0401_H2H4K60
 import socket
 import logging
 import time
