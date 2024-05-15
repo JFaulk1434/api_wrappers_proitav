@@ -63,28 +63,6 @@ def format_pretty_audio_info(audio_info):
     return pretty_string
 
 
-# Example dictionaries
-audio_info1 = {
-    "State": "On",
-    "Source": "HDMI",
-    "format": "I2S",
-    "Type": "LPCM (0x80)",
-    "Sample Freq": "48 KHz",
-    "Sample Size": "24 bits",
-    "Valid Ch": "2",
-}
-
-audio_info2 = {
-    "State": "On",
-    "Source": "HDMI",
-    "format": "I2S",
-    "Type": "Non-LPCM [5.1 Ch] (0x90)",
-    "Sample Freq": "192 KHz",
-    "Sample Size": "24 bits",
-    "Valid Ch": "2 (Encoded)",
-}
-
-
 class IP5100:
     """Python class for controlling the IP5100 encoder/decoder via Telnet."""
 
@@ -641,7 +619,8 @@ class Encoder5100(IP5100):
         response = self.send("gbstatus")
         return string_to_dict(response)
 
-    def get_audio_info(self):
+    @property
+    def audio_info(self):
         """Returns a string of audio information from the device."""
         response = self.get_audio_input_info()
         if response["State"] == "On":
@@ -856,5 +835,5 @@ if __name__ == "__main__":
     ipe3 = Encoder5100("10.0.50.28")
 
     print(ipd5100.get_model_version())
-    print(ipe5100.get_audio_info())
-    print(ipe3.get_audio_info())
+    print(ipe5100.audio_info)
+    print(ipe3.audio_info)
