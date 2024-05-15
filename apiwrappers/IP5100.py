@@ -2,6 +2,8 @@
 # Version 1.0
 
 from telnetlib import Telnet
+import re
+from webbrowser import get
 
 
 # Helper functions
@@ -33,6 +35,54 @@ def string_to_dict(input_string):
     except Exception as e:
         print(f"Error converting string to dictionary: {e}")
         return {}
+
+
+def format_pretty_audio_info(audio_info):
+    # Extract the type and clean it by removing all text within parentheses and extracting channel info if present
+    type_match = re.search(r"^(.*?)(?: \[.*\])?(?: \(.*\))?$", audio_info["Type"])
+    audio_type = type_match.group(1) if type_match else audio_info["Type"]
+
+    # Check for channel info in the type field
+    channel_info_match = re.search(r"\[(.*?) Ch\]", audio_info["Type"])
+    if channel_info_match:
+        channel_info = (
+            channel_info_match.group(1) + "Ch"
+        )  # Appends 'Ch' directly to the number
+    else:
+        channel_info = (
+            audio_info["Valid Ch"].split(" ")[0] + "Ch"
+        )  # Adds 'Ch' if only a number is provided
+
+    # Clean up frequency and sample size
+    freq = audio_info["Sample Freq"].replace(" ", "")
+    size = audio_info["Sample Size"].replace(" ", "")
+
+    # Format the final string
+    pretty_string = f"{channel_info} {audio_type} {freq} {size}"
+
+    return pretty_string
+
+
+# Example dictionaries
+audio_info1 = {
+    "State": "On",
+    "Source": "HDMI",
+    "format": "I2S",
+    "Type": "LPCM (0x80)",
+    "Sample Freq": "48 KHz",
+    "Sample Size": "24 bits",
+    "Valid Ch": "2",
+}
+
+audio_info2 = {
+    "State": "On",
+    "Source": "HDMI",
+    "format": "I2S",
+    "Type": "Non-LPCM [5.1 Ch] (0x90)",
+    "Sample Freq": "192 KHz",
+    "Sample Size": "24 bits",
+    "Valid Ch": "2 (Encoded)",
+}
 
 
 class IP5100:
@@ -591,6 +641,14 @@ class Encoder5100(IP5100):
         response = self.send("gbstatus")
         return string_to_dict(response)
 
+    def get_audio_info(self):
+        """Returns a string of audio information from the device."""
+        response = self.get_audio_input_info()
+        if response["State"] == "On":
+            return format_pretty_audio_info(response)
+        else:
+            return "No Audio"
+
 
 class Decoder5100(IP5100):
     def __init__(self, host, port=24, timeout=3):
@@ -786,9 +844,17 @@ class Decoder5100(IP5100):
         response = self.send("gbstatus")
         return string_to_dict(response)
 
+    def set_source(self, mac):
+        """Connect to encoder with mac address or NULL to disconnect."""
+        return self.send(f"gbconfig --source-select {mac}")
+
 
 if __name__ == "__main__":
-    ipd5100 = Decoder5100("10.0.50.32")
-    # ipe5100 = Encoder5100("10.0.50.31")
+    ipd5100 = Decoder5100("10.0.50.30")
+    ipe5100 = Encoder5100("10.0.50.27")
+    ipe2 = Encoder5100("10.0.50.29")
+    ipe3 = Encoder5100("10.0.50.28")
 
-    print(ipd5100)
+    print(ipd5100.get_model_version())
+    print(ipe5100.get_audio_info())
+    print(ipe3.get_audio_info())
