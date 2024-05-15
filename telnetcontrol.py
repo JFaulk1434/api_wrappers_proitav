@@ -1,7 +1,6 @@
 import asyncio
 import telnetlib3
 from threading import Thread
-from asyncio import Future
 from concurrent.futures import ThreadPoolExecutor
 
 
