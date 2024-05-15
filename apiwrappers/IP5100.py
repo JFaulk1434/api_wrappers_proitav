@@ -620,7 +620,7 @@ class Encoder5100(IP5100):
         return string_to_dict(response)
 
     @property
-    def audio_info(self):
+    def audio_specs(self):
         """Returns a string of audio information from the device."""
         response = self.get_audio_input_info()
         if response["State"] == "On":
