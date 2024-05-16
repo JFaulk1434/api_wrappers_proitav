@@ -634,6 +634,5 @@ class SC009:
 
 
 if __name__ == "__main__":
-    controller = SC009("192.168.50.200")
-    while True:
-        print(controller.get_matrix())
+    controller = SC009("10.0.30.200")
+    print(controller.get_version())
