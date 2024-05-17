@@ -38,29 +38,32 @@ def string_to_dict(input_string):
 
 
 def format_pretty_audio_info(audio_info):
-    # Extract the type and clean it by removing all text within parentheses and extracting channel info if present
-    type_match = re.search(r"^(.*?)(?: \[.*\])?(?: \(.*\))?$", audio_info["Type"])
-    audio_type = type_match.group(1) if type_match else audio_info["Type"]
+    try:
+        # Extract the type and clean it by removing all text within parentheses and extracting channel info if present
+        type_match = re.search(r"^(.*?)(?: \[.*\])?(?: \(.*\))?$", audio_info["Type"])
+        audio_type = type_match.group(1) if type_match else audio_info["Type"]
 
-    # Check for channel info in the type field
-    channel_info_match = re.search(r"\[(.*?) Ch\]", audio_info["Type"])
-    if channel_info_match:
-        channel_info = (
-            channel_info_match.group(1) + "Ch"
-        )  # Appends 'Ch' directly to the number
-    else:
-        channel_info = (
-            audio_info["Valid Ch"].split(" ")[0] + "Ch"
-        )  # Adds 'Ch' if only a number is provided
+        # Check for channel info in the type field
+        channel_info_match = re.search(r"\[(.*?) Ch\]", audio_info["Type"])
+        if channel_info_match:
+            channel_info = (
+                channel_info_match.group(1) + "Ch"
+            )  # Appends 'Ch' directly to the number
+        else:
+            channel_info = (
+                audio_info["Valid Ch"].split(" ")[0] + "Ch"
+            )  # Adds 'Ch' if only a number is provided
 
-    # Clean up frequency and sample size
-    freq = audio_info["Sample Freq"].replace(" ", "")
-    size = audio_info["Sample Size"].replace(" ", "")
+        # Clean up frequency and sample size
+        freq = audio_info["Sample Freq"].replace(" ", "")
+        size = audio_info["Sample Size"].replace(" ", "")
 
-    # Format the final string
-    pretty_string = f"{channel_info} {audio_type} {freq} {size}"
+        # Format the final string
+        pretty_string = f"{channel_info} {audio_type} {freq} {size}"
 
-    return pretty_string
+        return pretty_string
+    except Exception as e:
+        print(f"Error formatting audio info: {e}")
 
 
 class IP5100:
@@ -823,17 +826,40 @@ class Decoder5100(IP5100):
         response = self.send("gbstatus")
         return string_to_dict(response)
 
-    def set_source(self, mac):
-        """Connect to encoder with mac address or NULL to disconnect."""
-        return self.send(f"gbconfig --source-select {mac}")
+    def set_source(self, mac, channels="z"):
+        """Connect to encoder with mac address or NULL to disconnect.
+        mac: Mac address of encoder or None to disconnect
+        v: Video over IP
+        u: USB over IP
+        a: Audio over IP
+        r: IR over IP
+        s: Serial over IP
+        i: Audio Return over IP, for encoder
+        z: all features. == vuasr
+        Z: all features except video over IP. == uasr
+        """
+
+        if mac:
+            mac = mac.replace(":", "").strip().upper()
+        else:
+            return self.send("e e_reconnect::NULL")
+        return self.send(f"e e_reconnect::{mac}::{channels}")
 
 
 if __name__ == "__main__":
+    from time import sleep
+
     ipd5100 = Decoder5100("10.0.50.30")
     ipe5100 = Encoder5100("10.0.50.27")
     ipe2 = Encoder5100("10.0.50.29")
     ipe3 = Encoder5100("10.0.50.28")
+    enc1 = "341B22F00532"
+    enc2 = "341B2281d128"
 
-    print(ipd5100.get_model_version())
-    print(ipe5100.audio_info)
-    print(ipe3.audio_info)
+    while True:
+        ipd5100.set_source(enc1)
+        sleep(5)
+        ipd5100.set_source(enc2)
+        sleep(5)
+        ipd5100.set_source(None)
+        sleep(5)

@@ -634,5 +634,14 @@ class SC009:
 
 
 if __name__ == "__main__":
-    controller = SC009("10.0.30.200")
-    print(controller.get_version())
+    controller = SC009("10.0.50.31")
+    commands = [
+        controller.get_version(),
+        controller.get_device_info(),
+        controller.get_device_json(),
+        controller.get_devicelist(),
+        controller.get_ipsettings(),
+    ]
+    for command in commands:
+        print(command)
+        print("\n")
