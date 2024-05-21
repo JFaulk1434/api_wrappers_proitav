@@ -38,6 +38,45 @@ def string_to_dict(input_string):
         return {}
 
 
+def audio_string_to_dict(input_string):
+    """
+    Convert a string of key-value pairs to a dictionary.
+
+    :param input_string: A string containing key-value pairs separated by '=' or ':'.
+    :return: A dictionary representation of the input string.
+    """
+    try:
+        # Split the string into lines
+        lines = input_string.split("\n")
+
+        # Split each line into a key-value pair and add it to the dictionary
+        result_dict = {}
+        for line in lines:
+            if "Sample Freq" in line and "Sample Size" in line:
+                # Handle the case where Sample Freq and Sample Size are on the same line
+                parts = line.split()
+                sample_freq_value = parts[2]
+                sample_size_value = parts[5] + " " + parts[6]
+
+                result_dict["Sample Freq"] = sample_freq_value
+                result_dict["Sample Size"] = sample_size_value
+            else:
+                separator = "=" if "=" in line else ":"
+                if separator in line:
+                    key, value = line.split(
+                        separator, 1
+                    )  # Only split on the first occurrence of the separator
+                    # Strip whitespace and carriage return characters from the key and value
+                    key = key.strip()
+                    value = value.strip().rstrip("\r")
+                    result_dict[key] = value
+
+        return result_dict
+    except Exception as e:
+        print(f"Error converting string to dictionary: {e}")
+        return {}
+
+
 def format_pretty_audio_info(audio_info):
     try:
         # Extract the type and clean it by removing all text within parentheses and extracting channel info if present
@@ -60,7 +99,7 @@ def format_pretty_audio_info(audio_info):
         size = audio_info["Sample Size"].replace(" ", "")
 
         # Format the final string
-        pretty_string = f"{channel_info} {audio_type} {freq} {size}"
+        pretty_string = f"{channel_info} {audio_type} {freq}KHz {size}"
 
         return pretty_string
     except Exception as e:
@@ -615,7 +654,7 @@ class Encoder5100(IP5100):
         Get audio information from the device.
         """
         response = self.send("cat /sys/devices/platform/1500_i2s/input_audio_info")
-        return string_to_dict(response)
+        return audio_string_to_dict(response)
 
     def get_video_input_info(self):
         """
@@ -859,3 +898,13 @@ if __name__ == "__main__":
     enc2 = "341B2281d128"
 
     device = Encoder5100("10.0.50.20")
+    sample_input = """State: On
+    Source: HDMI
+    format: I2S
+    Type: LPCM (0x80)
+    Sample Freq: 48 KHzSample Size: 24 bits
+    Valid Ch: 2"""
+
+    parsed_dict = audio_string_to_dict(sample_input)
+    print(parsed_dict)
+    print(format_pretty_audio_info(parsed_dict))
