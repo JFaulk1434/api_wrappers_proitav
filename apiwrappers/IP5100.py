@@ -97,15 +97,9 @@ class IP5100:
         """
         if self.tn is None:
             self.tn = Telnet()
-            # self.tn.set_debuglevel(1)  # Enable Telnet debug mode
         try:
             self.tn.open(self.host, self.port, timeout=1.0)
             response = self.tn.read_until(b"login:")
-            # if not self.connected:
-            #     response = response.decode().strip()
-            #     self.trueName = response.replace(" login:", "")
-            #     self.model = self.trueName.split("-")[1]
-
             self.tn.write(self.login.encode() + b"\r\n")
             self.tn.read_until(b"/ #")
             self.connected = True
@@ -128,33 +122,22 @@ class IP5100:
         Sends a message to the Controller and returns the response, ensuring the device is connected.
         Includes a retry mechanism if the initial send fails due to a connection issue.
         """
-        retry_attempts = 2  # Number of retry attempts
-        for attempt in range(retry_attempts):
-            if not self.ensure_connection():
-                print(
-                    f"Attempt {attempt + 1}: Unable to send command to {self.host}, device is not connected."
-                )
-                continue
+        if not self.ensure_connection():
+            return "Failed to establish connection"
 
-            try:
-                message_bytes = f"{message}\n".encode()
-                self.tn.write(message_bytes)
-                stdout = self.tn.read_until(b"/ #").decode()
-                response = stdout.strip("/ #")
-                if response.startswith(message):
-                    response = response[len(message) :].strip()
-                return response
-            except Exception as e:
-                print(
-                    f"Attempt {attempt + 1}: Failed to send command to {self.host}. Error: {e}"
-                )
-                self.disconnect()  # Ensure disconnection before retrying
-                self.tn = None  # Reset the Telnet connection
-
-                if attempt == retry_attempts - 1:
-                    return "Failed to send command after retries"
-
-        return "Failed to establish connection"
+        try:
+            message_bytes = f"{message}\n".encode()
+            self.tn.write(message_bytes)
+            stdout = self.tn.read_until(b"/ #").decode()
+            response = stdout.strip("/ #")
+            if response.startswith(message):
+                response = response[len(message) :].strip()
+            return response
+        except Exception as e:
+            print(f"Failed to send command to {self.host}. Error: {e}")
+            self.disconnect()  # Ensure disconnection before retrying
+            self.tn = None  # Reset the Telnet connection
+            return "Failed to send command after retries"
 
     def disconnect(self):
         """
@@ -167,6 +150,9 @@ class IP5100:
                 print(f"Error closing Telnet connection: {e}")
             finally:
                 self.tn = None
+
+    def get_info(self):
+        """Fetches device info. Stub method for now."""
 
     def get_info(self):
         """Gathers all device information."""
@@ -489,8 +475,8 @@ class IP5100:
         """
         Set the alias of the device.
         """
-        self.alias = value
-        return self.send(f"astparam s name {value}; astparam save")
+        self.alias = value.replace("_", "-")
+        return self.send(f'astparam s name "{value}"; astparam save')
 
     def get_alias(self):
         """
@@ -856,10 +842,4 @@ if __name__ == "__main__":
     enc1 = "341B22F00532"
     enc2 = "341B2281d128"
 
-    while True:
-        ipd5100.set_source(enc1)
-        sleep(5)
-        ipd5100.set_source(enc2)
-        sleep(5)
-        ipd5100.set_source(None)
-        sleep(5)
+    device = Encoder5100("10.0.50.20")
