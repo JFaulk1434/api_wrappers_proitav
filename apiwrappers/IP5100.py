@@ -4,6 +4,7 @@
 from telnetlib import Telnet
 import re
 from webbrowser import get
+import time
 
 
 # Helper functions
@@ -150,9 +151,6 @@ class IP5100:
                 print(f"Error closing Telnet connection: {e}")
             finally:
                 self.tn = None
-
-    def get_info(self):
-        """Fetches device info. Stub method for now."""
 
     def get_info(self):
         """Gathers all device information."""
@@ -593,6 +591,24 @@ class Encoder5100(IP5100):
         Read EDID from the device.
         """
         return self.send("cat /sys/devices/platform/videoip/edid_cache")
+
+    def fix_edid(self, edid):
+        """Attempt to handle IPE5101 EDID issues"""
+        attempts = 5
+
+        while True:
+            status = self.get_video_input_info()
+            if status is not None and status.get("hdmi in active") == "true":
+                break
+            elif attempts != 0:
+                self.reset_edid()
+                attempts -= 1
+                time.sleep(2)
+                self.set_edid(edid)
+                time.sleep(5)
+            else:
+                print(f"Failed to fix EDID on {self.trueName}")
+                break
 
     def get_audio_input_info(self):
         """
