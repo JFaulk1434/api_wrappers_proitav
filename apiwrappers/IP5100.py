@@ -631,6 +631,12 @@ class Encoder5100(IP5100):
         """
         return self.send("cat /sys/devices/platform/videoip/edid_cache")
 
+    def edid_reset(self):
+        """Reset the EDID"""
+        return self.send(
+            "cat /sys/devices/platform/display/default_edid_hdmi > /sys/devices/platform/videoip/eeprom_content"
+        )
+
     def fix_edid(self, edid):
         """Attempt to handle IPE5101 EDID issues"""
         attempts = 5
@@ -640,7 +646,7 @@ class Encoder5100(IP5100):
             if status is not None and status.get("hdmi in active") == "true":
                 break
             elif attempts != 0:
-                self.reset_edid()
+                self.edid_reset()
                 attempts -= 1
                 time.sleep(2)
                 self.set_edid(edid)
@@ -891,20 +897,10 @@ if __name__ == "__main__":
     from time import sleep
 
     ipd5100 = Decoder5100("10.0.50.30")
-    ipe5100 = Encoder5100("10.0.50.27")
+    ipe5100 = Encoder5100("10.0.50.26")
     ipe2 = Encoder5100("10.0.50.29")
     ipe3 = Encoder5100("10.0.50.28")
     enc1 = "341B22F00532"
     enc2 = "341B2281d128"
 
-    device = Encoder5100("10.0.50.20")
-    sample_input = """State: On
-    Source: HDMI
-    format: I2S
-    Type: LPCM (0x80)
-    Sample Freq: 48 KHzSample Size: 24 bits
-    Valid Ch: 2"""
-
-    parsed_dict = audio_string_to_dict(sample_input)
-    print(parsed_dict)
-    print(format_pretty_audio_info(parsed_dict))
+    print(ipe5100.connect())
