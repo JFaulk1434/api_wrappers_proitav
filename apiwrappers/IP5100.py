@@ -649,7 +649,7 @@ class Encoder5100(IP5100):
                 self.edid_reset()
                 attempts -= 1
                 time.sleep(2)
-                self.set_write(edid)
+                self.edid_write(edid)
                 time.sleep(5)
             else:
                 print(f"Failed to fix EDID on {self.trueName}")
