@@ -3,6 +3,7 @@
 
 from telnetlib import Telnet
 import re
+from turtle import right
 from webbrowser import get
 import time
 
@@ -123,7 +124,7 @@ class IP5100:
         self.alias = None
 
         self.connected = False
-        self.get_info()
+        self.get_alias()
 
         self.url = f"http://{self.host}/settings.html"
         self.stream = f"http://{self.host}:8080/?action=stream"
@@ -137,9 +138,15 @@ class IP5100:
         """
         if self.tn is None:
             self.tn = Telnet()
+            self.tn.set_debuglevel(0)
         try:
             self.tn.open(self.host, self.port, timeout=1.0)
             response = self.tn.read_until(b"login:")
+            response_str = response.decode("utf-8").strip()
+            parts = response_str.split("-")
+            self.model = parts[0].strip()
+            self.mac = parts[1].strip().split(" ")[0]
+
             self.tn.write(self.login.encode() + b"\r\n")
             self.tn.read_until(b"/ #")
             self.connected = True
@@ -168,6 +175,7 @@ class IP5100:
         try:
             message_bytes = f"{message}\n".encode()
             self.tn.write(message_bytes)
+            self.tn.write(b"")
             stdout = self.tn.read_until(b"/ #").decode()
             response = stdout.strip("/ #")
             if response.startswith(message):
@@ -193,7 +201,6 @@ class IP5100:
 
     def get_info(self):
         """Gathers all device information."""
-        self.get_model_version()
         self.get_alias()
         mac = self.get_mac()
         mac = mac.replace(":", "")
@@ -784,13 +791,12 @@ class Decoder5100(IP5100):
         value = self.timing[value]["hex"]
         return self.send(f"astparam s v_output_timing_convert {value}")
 
-    def set_vwall(self, value):
+    def set_vwall_disable(self):
         """
-        Set the vwall of the device.
-        y: Enable
-        n: Disable
+        Disable Video wall
         """
-        return self.send(f"astparam s en_video_wall {value}")
+        self.send(f"e e_vw_enable_0_0_0_0")
+        self.send("e e_vw_enable_0_0_0_0_2")
 
     def set_vwall_rotate(self, value):
         """
@@ -812,7 +818,7 @@ class Decoder5100(IP5100):
         1: Stretch Out
         2: Fit In
         """
-        return self.send(f"astparam s vw_stretch_type {value}")
+        return self.send(f"e e_vw_stretch_type_{value}")
 
     def set_audio_out_source(self, value):
         """
@@ -892,15 +898,140 @@ class Decoder5100(IP5100):
             return self.send("e e_reconnect::NULL")
         return self.send(f"e e_reconnect::{mac}::{channels}")
 
+    def set_monitor_info(self, ow, oh, vw, vh):
+        """ow: Outer Width
+        oh: Outer Height
+        vw: Video Width
+        vh: Video Height
+        measured in mm"""
+        command = f"e e_vw_moninfo_{vw}_{ow}_{vh}_{oh}"
+        response = self.send(command)
+        # print(f"Set Monitor Info: {command}\nResponse: {response}")
+
+    def set_video_wall_v1(self, rows, columns, row_location, column_location):
+        """rows: Number of rows
+        columns: Number of columns
+        row_location: Row location
+        column_location: Column location"""
+        rows = rows - 1 if isinstance(rows, int) else rows
+        columns = columns - 1 if isinstance(columns, int) else columns
+        row_location = (
+            row_location - 1 if isinstance(row_location, int) else row_location
+        )
+        column_location = (
+            column_location - 1 if isinstance(column_location, int) else column_location
+        )
+
+        command = f"e e_vw_enable_{rows}_{columns}_{row_location}_{column_location}_1"
+        response = self.send(command)
+        # print(f"Enable Video Wall: {command}\nResponse: {response}")
+
+    def set_video_wall_v2(self, x_top, y_top, x_bot, y_bot):
+        """x_top: X Top
+        y_top: Y Top
+        x_bot: X Bottom
+        y_bot: Y Bottom"""
+        command = f"e e_vw_enable_{x_top}_{y_top}_{x_bot}_{y_bot}_2"
+        response = self.send(command)
+        # print(f"Set Video Wall: {command}\nResponse: {response}")
+
+    def set_video_wall_vshift(self, direction, value):
+        """Set the video wall vertical shift down of the device.
+        direction: u for up, d for down"""
+        return self.send(f"e e_vw_v_shift_{direction}_{value}")
+
+    def set_video_wall_hshift(self, direction, value):
+        """Set the video wall vertical shift up of the device.
+        direction: l for left, r for right"""
+        return self.send(f"e e_vw_v_shift_{direction}_{value}")
+
+    def set_video_wall_hscale(self, value):
+        """Set the video wall horizontal scale of the device."""
+        return self.send(f"e e_vw_h_scale_{value}")
+
+    def set_video_wall_vscale(self, value):
+        """Set the video wall vertical scale of the device."""
+        return self.send(f"e e_vw_v_scale_{value}")
+
+    def set_video_wall_delay_kick(self, value):
+        """Set the video wall delay kick of the device."""
+        return self.send(f"e e_vw_delay_kick_{value}")
+
 
 if __name__ == "__main__":
-    from time import sleep
+    bezel = {"ow": 933, "oh": 527, "vw": 887, "vh": 490}
+    bezel1 = {"ow": 933, "oh": 527, "vw": 933, "vh": 490}
+    bezel2 = {"ow": 0, "oh": 0, "vw": 0, "vh": 0}
+    bezel3 = {"ow": 9334, "oh": 5270, "vw": 8873, "vh": 4904}
 
-    ipd5100 = Decoder5100("10.0.50.30")
-    ipe5100 = Encoder5100("10.0.50.26")
-    ipe2 = Encoder5100("10.0.50.29")
-    ipe3 = Encoder5100("10.0.50.28")
-    enc1 = "341B22F00532"
-    enc2 = "341B2281d128"
+    tv3 = Decoder5100("10.0.50.32")
+    tv4 = Decoder5100("10.0.50.30")
 
-    print(ipe5100.connect())
+    apple = Encoder5100("10.0.50.26")
+    murideo = Encoder5100("10.0.50.28")
+
+    # print(f"apple mac: {apple.mac} ip: {apple.host}")
+    # print(f"murideo mac: {murideo.mac} ip: {murideo.host}")
+
+    bezel_width = 20
+    bezel_height = 0
+
+    def setup_1x2_vw_v1(source_mac, left_tv, right_tv, oh=0, ow=0, vh=0, vw=0):
+        left_tv = Decoder5100(left_tv)  # Must be an IP address
+        right_tv = Decoder5100(right_tv)  # Must be an IP address
+
+        left_tv.set_source(source_mac)
+        right_tv.set_source(source_mac)
+
+        left_tv.set_monitor_info(oh=oh, ow=ow, vh=vh, vw=vw)
+        right_tv.set_monitor_info(oh=oh, ow=ow, vh=vh, vw=vw)
+
+        left_tv.set_video_wall_v1(1, 2, 1, 1)
+        right_tv.set_video_wall_v1(1, 2, 1, 2)
+
+        left_tv.save()
+        right_tv.save()
+
+    def setup_1x2_vw_v2(source_mac, left_tv, right_tv):
+        left_tv = Decoder5100(left_tv)  # Must be an IP address
+        right_tv = Decoder5100(right_tv)  # Must be an IP address
+
+        left_tv.set_source(source_mac)
+        right_tv.set_source(source_mac)
+
+        left_tv.set_video_wall_v2(0, 0, 5000 + bezel_width, 10000 + bezel_height)
+        right_tv.set_video_wall_v2(5000 - bezel_width, 0, 10000, 10000 - bezel_height)
+
+        left_tv.save()
+        right_tv.save()
+
+    def setup_2x2_vw_v2(source_mac, tl, tr, bl, br):
+        tl = Decoder5100(tl)  # Must be an IP address
+        tr = Decoder5100(tr)
+        bl = Decoder5100(bl)
+        br = Decoder5100(br)
+
+        decoders = [tl, tr, bl, br]
+
+        for decoder in decoders:
+            decoder.set_source(source_mac)
+
+        tl.set_video_wall_v2(0, 0, 5025, 5025)
+        tr.set_video_wall_v2(4975, 0, 10000, 5025)
+        bl.set_video_wall_v2(0, 4975, 5025, 10000)
+        br.set_video_wall_v2(4975, 4975, 10000, 10000)
+
+        for decoder in decoders:
+            decoder.save()
+
+    # setup_1x2_vw_v1(murideo.mac, "10.0.50.32", "10.0.50.30")
+
+    setup_1x2_vw_v2(murideo.mac, "10.0.50.32", "10.0.50.30")
+
+    # setup_2x2_vw_v2(murideo.mac, "10.0.50.32", "10.0.50.30", "10.0.50.20", "10.0.50.20")
+
+    def setup_matrix():
+        tv3.set_vwall_disable()
+        tv4.set_vwall_disable()
+        tv3.set_source(apple.mac)
+        tv4.set_source(murideo.mac)
