@@ -1,10 +1,8 @@
 # IP5100.py - IP5100 Python Module
-# Version 1.0
+# Version 1.1
 
 from telnetlib import Telnet
 import re
-from turtle import right
-from webbrowser import get
 import time
 
 
@@ -110,9 +108,9 @@ def format_pretty_audio_info(audio_info):
 class IP5100:
     """Python class for controlling the IP5100 encoder/decoder via Telnet."""
 
-    def __init__(self, host, port=24, timeout=3, login="root"):
+    def __init__(self, ip, port=24, timeout=3, login="root"):
         """Create the class using the IP address, port, and login credentials."""
-        self.host = host
+        self.ip = ip
         self.port = port
         self.timeout = timeout
         self.login = login
@@ -124,13 +122,16 @@ class IP5100:
         self.alias = None
 
         self.connected = False
+
         self.get_alias()
 
-        self.url = f"http://{self.host}/settings.html"
-        self.stream = f"http://{self.host}:8080/?action=stream"
+        self.url = f"http://{self.ip}/settings.html"
+        self.stream = f"http://{self.ip}:8080/?action=stream"
 
     def __str__(self):
-        return f"{self.trueName} - {self.alias} - {self.host} - {self.version} - {self.mac}"
+        return (
+            f"{self.trueName} - {self.alias} - {self.ip} - {self.version} - {self.mac}"
+        )
 
     def connect(self):
         """
@@ -140,7 +141,7 @@ class IP5100:
             self.tn = Telnet()
             self.tn.set_debuglevel(0)
         try:
-            self.tn.open(self.host, self.port, timeout=1.0)
+            self.tn.open(self.ip, self.port, timeout=1.0)
             response = self.tn.read_until(b"login:")
             response_str = response.decode("utf-8").strip()
             parts = response_str.split("-")
@@ -152,8 +153,9 @@ class IP5100:
             self.connected = True
             return True
         except Exception as e:
-            print(f"Failed to connect to {self.host}. Error: {e}")
+            print(f"Failed to connect to {self.ip}. Error: {e}")
             self.tn = None  # Reset the connection
+            self.connected = False
             return False
 
     def ensure_connection(self):
@@ -182,10 +184,10 @@ class IP5100:
                 response = response[len(message) :].strip()
             return response
         except Exception as e:
-            print(f"Failed to send command to {self.host}. Error: {e}")
+            print(f"Failed to send command to {self.ip}. Error: {e}")
             self.disconnect()  # Ensure disconnection before retrying
             self.tn = None  # Reset the Telnet connection
-            return "Failed to send command after retries"
+            return "Failed to send command"
 
     def disconnect(self):
         """
@@ -198,6 +200,7 @@ class IP5100:
                 print(f"Error closing Telnet connection: {e}")
             finally:
                 self.tn = None
+                self.connected = False
 
     def get_info(self):
         """Gathers all device information."""
@@ -483,8 +486,6 @@ class IP5100:
         # Send the command
         return self.send(command)
 
-    # TODO - Add rest of the serial commands
-
     def set_cec_enable(self, status: bool = True):
         """
         Enable or disable CEC on the device.
@@ -543,9 +544,9 @@ class IP5100:
 
 
 class Encoder5100(IP5100):
-    def __init__(self, host, port=24, timeout=3):
+    def __init__(self, ip, port=24, timeout=3):
         """Create the class for an Encoder using the IP address, port, and login credentials."""
-        super().__init__(host, port, timeout)
+        super().__init__(ip, port, timeout)
 
     @property
     def video_specs(self):
@@ -687,9 +688,9 @@ class Encoder5100(IP5100):
 
 
 class Decoder5100(IP5100):
-    def __init__(self, host, port=24, timeout=3):
+    def __init__(self, ip, port=24, timeout=3):
         """Create the class for a Decoder using the IP address, port, and login credentials."""
-        super().__init__(host, port, timeout)
+        super().__init__(ip, port, timeout)
 
         self.timing = {
             0: {"name": "Pass-Through", "hex": "00000000"},
@@ -969,9 +970,6 @@ if __name__ == "__main__":
 
     apple = Encoder5100("10.0.50.26")
     murideo = Encoder5100("10.0.50.28")
-
-    # print(f"apple mac: {apple.mac} ip: {apple.host}")
-    # print(f"murideo mac: {murideo.mac} ip: {murideo.host}")
 
     bezel_width = 20
     bezel_height = 0
