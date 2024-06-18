@@ -35,8 +35,10 @@ class SC009:
         self.tn = None
         self.url = f"http://{self.ip}"
         self.connect()
-        self.version = self.get_version()
-        self.system_info = self.get_system_info()
+        self.api_version = None
+        self.system_version = None
+
+        self.get_version()
 
     def connect(self):
         """
@@ -141,6 +143,8 @@ class SC009:
     def get_version(self) -> dict:
         response = self.send("config get version")
         dict = string_to_dict(response)
+        self.api_version = dict.get("API version")
+        self.system_version = dict.get("System version")
         return dict
 
     def get_system_info(self) -> dict:
@@ -634,9 +638,10 @@ class SC009:
 
 
 if __name__ == "__main__":
-    controller = SC009("10.0.50.31")
+    controller = SC009("10.0.50.200")
     commands = [
         controller.get_version(),
+        controller.get_system_info(),
         controller.get_device_info(),
         controller.get_device_json(),
         controller.get_devicelist(),

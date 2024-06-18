@@ -119,6 +119,7 @@ class IP5100:
         self.model = None
         self.mac = None
         self.trueName = None
+        self.version = None
         self.alias = None
 
         self.connected = False
@@ -960,76 +961,8 @@ class Decoder5100(IP5100):
 
 
 if __name__ == "__main__":
-    bezel = {"ow": 933, "oh": 527, "vw": 887, "vh": 490}
-    bezel1 = {"ow": 933, "oh": 527, "vw": 933, "vh": 490}
-    bezel2 = {"ow": 0, "oh": 0, "vw": 0, "vh": 0}
-    bezel3 = {"ow": 9334, "oh": 5270, "vw": 8873, "vh": 4904}
+    encoder = Encoder5100("10.0.50.2")
+    in1 = "SET SW in1 out"
+    in2 = "SET SW in2 out"
 
-    tv3 = Decoder5100("10.0.50.32")
-    tv4 = Decoder5100("10.0.50.30")
-
-    apple = Encoder5100("10.0.50.26")
-    murideo = Encoder5100("10.0.50.28")
-
-    bezel_width = 20
-    bezel_height = 0
-
-    def setup_1x2_vw_v1(source_mac, left_tv, right_tv, oh=0, ow=0, vh=0, vw=0):
-        left_tv = Decoder5100(left_tv)  # Must be an IP address
-        right_tv = Decoder5100(right_tv)  # Must be an IP address
-
-        left_tv.set_source(source_mac)
-        right_tv.set_source(source_mac)
-
-        left_tv.set_monitor_info(oh=oh, ow=ow, vh=vh, vw=vw)
-        right_tv.set_monitor_info(oh=oh, ow=ow, vh=vh, vw=vw)
-
-        left_tv.set_video_wall_v1(1, 2, 1, 1)
-        right_tv.set_video_wall_v1(1, 2, 1, 2)
-
-        left_tv.save()
-        right_tv.save()
-
-    def setup_1x2_vw_v2(source_mac, left_tv, right_tv):
-        left_tv = Decoder5100(left_tv)  # Must be an IP address
-        right_tv = Decoder5100(right_tv)  # Must be an IP address
-
-        left_tv.set_source(source_mac)
-        right_tv.set_source(source_mac)
-
-        left_tv.set_video_wall_v2(0, 0, 5000 + bezel_width, 10000 + bezel_height)
-        right_tv.set_video_wall_v2(5000 - bezel_width, 0, 10000, 10000 - bezel_height)
-
-        left_tv.save()
-        right_tv.save()
-
-    def setup_2x2_vw_v2(source_mac, tl, tr, bl, br):
-        tl = Decoder5100(tl)  # Must be an IP address
-        tr = Decoder5100(tr)
-        bl = Decoder5100(bl)
-        br = Decoder5100(br)
-
-        decoders = [tl, tr, bl, br]
-
-        for decoder in decoders:
-            decoder.set_source(source_mac)
-
-        tl.set_video_wall_v2(0, 0, 5025, 5025)
-        tr.set_video_wall_v2(4975, 0, 10000, 5025)
-        bl.set_video_wall_v2(0, 4975, 5025, 10000)
-        br.set_video_wall_v2(4975, 4975, 10000, 10000)
-
-        for decoder in decoders:
-            decoder.save()
-
-    # setup_1x2_vw_v1(murideo.mac, "10.0.50.32", "10.0.50.30")
-
-    setup_1x2_vw_v2(murideo.mac, "10.0.50.32", "10.0.50.30")
-
-    # setup_2x2_vw_v2(murideo.mac, "10.0.50.32", "10.0.50.30", "10.0.50.20", "10.0.50.20")
-
-    def setup_matrix():
-        tv3.set_vwall_disable()
-        tv4.set_vwall_disable()
-        tv3.set_source(apple.mac)
-        tv4.set_source(murideo.mac)
+    print(encoder.send_serial_data("115200-8n1", in1))
