@@ -283,6 +283,7 @@ class SC009:
         command = (
             f"config set device info device_mode={mode.upper()} {hostname.upper()}"
         )
+        return self.send(command)
 
     def set_session_alias(self, on_off):
         """Open or close the alias mode on the current session, if the value set to be on, then all API command next to it will get alias information feedback, while the feedback got alias. If the value set to be off, then all
