@@ -442,7 +442,10 @@ class SC009:
         response = self.send(command)
         response = response.replace("device json string:", "").strip()
 
-        return json.loads(response)
+        try:
+            return json.loads(response)
+        except:
+            return []
 
     def get_scene_json(self):
         """Obtains all scene information.
