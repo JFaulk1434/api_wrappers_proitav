@@ -49,7 +49,7 @@ class SC009:
         try:
             self.tn.open(self.ip, self.port, timeout=1.0)
             self.tn.read_until(b"welcome to use hdip system.")
-            print("Connected")
+            # print("Connected")
             return True
         except Exception as e:
             print(f"Failed to connect to SC009 at {self.ip}. Error: {e}")
@@ -84,49 +84,6 @@ class SC009:
             self.tn = None  # Reset the connection in case of error
             return None
 
-    # def send(self, message: str) -> str:
-    #     """
-    #     Sends a message to the Controller and returns the response, ensuring the device is connected.
-    #     Includes a retry mechanism if the initial send fails due to a connection issue.
-    #     """
-    #     try:
-    #         message_bytes = f"{message}\n".encode()
-    #         self.tn.write(message_bytes)
-    #         stdout = self.tn.read_until(b"\r\n\r\n")
-    #         decoded = stdout.decode()
-    #         return decoded
-
-    #     except Exception as e:
-    #         print("Failed to send SC009", e)
-    #         self.disconnect()
-    #     # retry_attempts = 2  # Number of retry attempts
-    #     # for attempt in range(retry_attempts):
-    #     #     if not self.ensure_connection():
-    #     #         print(
-    #     #             f"Attempt {attempt + 1}: Unable to send command to SC009, device is not connected."
-    #     #         )
-    #     #         continue
-
-    #     #     try:
-    #     #         message_bytes = f"{message}\n".encode()
-    #     #         self.tn.write(message_bytes)
-    #     #         stdout = self.tn.read_until(b"/ #").decode()
-    #     #         response = stdout.strip("/ #")
-    #     #         if response.startswith(message):
-    #     #             response = response[len(message) :].strip()
-    #     #         return response
-    #     #     except Exception as e:
-    #     #         print(
-    #     #             f"Attempt {attempt + 1}: Failed to send command to SC009. Error: {e}"
-    #     #         )
-    #     #         self.disconnect()  # Ensure disconnection before retrying
-    #     #         self.tn = None  # Reset the Telnet connection
-
-    #     #         if attempt == retry_attempts - 1:
-    #     #             return "Failed to send command after retries"
-
-    #     # return "Failed to establish connection"
-
     def disconnect(self):
         """
         Safely closes the Telnet connection if it exists.
@@ -134,7 +91,7 @@ class SC009:
         if self.tn is not None:
             try:
                 self.tn.close()
-                print("Disconnected")
+                # print("Disconnected")
             except Exception as e:
                 print(f"Error closing Telnet connection: {e}")
             finally:
@@ -319,6 +276,13 @@ class SC009:
         """
         command = f"config set device audio2source {hostname} {type}"
         return self.send(command)
+
+    def set_device_mode(self, mode, hostname):
+        """Set device mode
+        mode: RECEIVER, TRANSMITTER or TRANSCEIVER"""
+        command = (
+            f"config set device info device_mode={mode.upper()} {hostname.upper()}"
+        )
 
     def set_session_alias(self, on_off):
         """Open or close the alias mode on the current session, if the value set to be on, then all API command next to it will get alias information feedback, while the feedback got alias. If the value set to be off, then all
