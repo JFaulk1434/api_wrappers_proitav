@@ -565,6 +565,11 @@ class SC009:
         command = f'cec "{command}" {host}'
         return self.send(command)
 
+    def find_me(self, seconds, host):
+        """Blink LEDS for seconds on device"""
+        command = f"config set device findme {seconds} {host}"
+        return self.send(command)
+
     def help(self):
         """Prints out all functions available"""
         functions = [
