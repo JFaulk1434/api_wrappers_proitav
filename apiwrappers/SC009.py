@@ -570,6 +570,46 @@ class SC009:
         command = f"config set device findme {seconds} {host}"
         return self.send(command)
 
+    def set_vw_add(self, name, nrows, ncols, encoder):
+        """Add video wall"""
+        command = f"vw add {name} {nrows} {ncols} {encoder}"
+        return self.send(command)
+
+    def get_vw(self):
+        """Get video wall"""
+        return self.send("vw get")
+
+    def set_vw_change_source(self, vw_name, tx_name):
+        """Change source of video wall"""
+        command = f"vw change {vw_name} {tx_name}"
+        return self.send(command)
+
+    def set_vw_bezelgap(self, vw_name, ow, oh, vw, vh):
+        """Set video wall bezel gap"""
+        return self.send(f"vw bezelgap {vw_name} {ow} {oh} {vw} {vh}")
+
+    def set_vw_stretch(self, vw_name, type):
+        """Set video wall stretch
+
+        type: fit, stretch, fill
+
+        fit: The picture will scale in proportion; it will be displayed proportionally in maximized state; there may be blank space.
+        stretch: The picture will scale out of proportion; it will be stretched and shown according to the screen resolution; there's no blank space.
+        fill: The picture will scale in proportion to fill the screen; there's no blank space, while part of the picture may not be displayed.
+        """
+        return self.send(f"vw stretch {vw_name} {type}")
+
+    def set_vw_add_layout(self, vw_name, nrows, ncols, tx_hostname, *rx_hostnames):
+        """Add layout to video wall"""
+        command = f"vw add {vw_name} layout {nrows} {ncols} {tx_hostname}"
+        for rx_hostname in rx_hostnames:
+            command += f" {rx_hostname}"
+        return self.send(command)
+
+    def set_vw_change(self, rx_hostname, tx_hostname):
+        """Remove RX from video and have it switch to TX in full picture"""
+        return self.send(f"vw change {rx_hostname} {tx_hostname}")
+
     def help(self):
         """Prints out all functions available"""
         functions = [
