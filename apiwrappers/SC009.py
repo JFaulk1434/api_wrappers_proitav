@@ -599,6 +599,10 @@ class SC009:
         """
         return self.send(f"vw stretch {vw_name} {type}")
 
+    def set_vw_remove(self, vw_name):
+        """Remove video wall"""
+        return self.send(f"vw rm {vw_name}")
+
     def set_vw_add_layout(self, vw_name, nrows, ncols, tx_hostname, *rx_hostnames):
         """Add layout to video wall"""
         command = f"vw add {vw_name} layout {nrows} {ncols} {tx_hostname}"
