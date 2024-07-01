@@ -2,6 +2,9 @@
 
 from telnetlib import Telnet
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 # Helpers
@@ -26,6 +29,15 @@ def strip_to_dict(message: str) -> dict:
         stripped_string = message
 
     return json.loads(stripped_string)
+
+
+def clean_response(response: str) -> str:
+    """Strips everything before the first '[' or '{' in the response."""
+    start_index = min(response.find("["), response.find("{"))
+    if start_index == -1:
+        logger.error(f"Invalid response format: {response}")
+        return response
+    return response[start_index:]
 
 
 class SC009:
@@ -394,18 +406,26 @@ class SC009:
         """Obtains device working parameters in real time.
         Note:
         hostname1 and hostname2 are device names.
-        You can get one or multiple devices' working parametersat one time.
+        You can get one or multiple devices' working parameters at one time.
         Alias name feature is added from the API v1.7 version
-        It may take some time for IP controller to get device information.The developer must consider this factor when programming the caller’s code.
-        Working parameters useKey:Value format. Key is a parameter name and value is its value. For more information, see 3.1Device Infosection.
+        It may take some time for IP controller to get device information.
+        The developer must consider this factor when programming the caller’s code.
+        Working parameters use Key:Value format. Key is a parameter name and value is its value. For more information, see 3.1 Device Info section.
         """
         command = f"config get device info "
         for hostname in hostnames:
             command += hostname + " "
         response = self.send(command)
-        return response
+        logger.debug(f"Raw response for device info: {response}")
 
-    def get_device_status(self, *hostnames):
+        cleaned_response = clean_response(response)
+        try:
+            return json.loads(cleaned_response)
+        except json.JSONDecodeError as e:
+            logger.error(f"JSON decoding error: {e}, response: {cleaned_response}")
+            return {}
+
+    def get_device_status(self, *hostnames) -> dict:
         """Obtains device status in real time.
         Note:
         hostname1 and hostname2 are device names.
@@ -417,9 +437,16 @@ class SC009:
             command += hostname + " "
 
         response = self.send(command)
-        return response
+        logger.debug(f"Raw response for device status: {response}")
 
-    def get_device_json(self):
+        cleaned_response = clean_response(response)
+        try:
+            return json.loads(cleaned_response)
+        except json.JSONDecodeError as e:
+            logger.error(f"JSON decoding error: {e}, response: {cleaned_response}")
+            return {}
+
+    def get_device_json(self) -> list:
         """Obtains all device information and returns a list of dictionaries.
         Note:
         "aliasName" represents device alias name (If no alias name appears, it means that this device is not given an alias name).
@@ -430,9 +457,17 @@ class SC009:
         "sequence" in a device represents the position of this device in its group, which starts with 1. If "sequence" is 0, it means that this device is not arranged in specific order. In this case, you can put this device in a position based on programming.
         "trueName" represents device true name.
         """
-        return self.send("config get devicejsonstring")
+        response = self.send("config get devicejsonstring")
+        logger.debug(f"Raw response for device json: {response}")
 
-    def get_scene_json(self):
+        cleaned_response = clean_response(response)
+        try:
+            return json.loads(cleaned_response)
+        except json.JSONDecodeError as e:
+            logger.error(f"JSON decoding error: {e}, response: {cleaned_response}")
+            return []
+
+    def get_scene_json(self) -> dict:
         """Obtains all scene information.
         Note:
         "group" represents a group. One scene can only be put in one group. "sequence" in" group" represents the position of this group, which starts with 1. If "sequence" is 0, it means that this group is not arranged in specific order. In this case, you can put this group in a position based on programming.
@@ -446,8 +481,14 @@ class SC009:
         """
         command = "config get scenejsonstring"
         response = self.send(command)
-        response = response.replace("scene json string:", "").strip()
-        return json.loads(response)
+        logger.debug(f"Raw response for scene json: {response}")
+
+        cleaned_response = clean_response(response)
+        try:
+            return json.loads(cleaned_response)
+        except json.JSONDecodeError as e:
+            logger.error(f"JSON decoding error: {e}, response: {cleaned_response}")
+            return {}
 
     def get_telnet_alias(self):
         """Get the rs-232 alias mode."""
