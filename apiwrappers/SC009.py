@@ -403,11 +403,7 @@ class SC009:
         for hostname in hostnames:
             command += hostname + " "
         response = self.send(command)
-        response = response.replace("devices json info:", "")
-        try:
-            return json.loads(response)
-        except:
-            return response
+        return response
 
     def get_device_status(self, *hostnames):
         """Obtains device status in real time.
@@ -421,11 +417,7 @@ class SC009:
             command += hostname + " "
 
         response = self.send(command)
-        response = response.replace("devices status info:", "")
-        try:
-            return json.loads(response)
-        except:
-            return response
+        return response
 
     def get_device_json(self):
         """Obtains all device information and returns a list of dictionaries.
@@ -438,14 +430,7 @@ class SC009:
         "sequence" in a device represents the position of this device in its group, which starts with 1. If "sequence" is 0, it means that this device is not arranged in specific order. In this case, you can put this device in a position based on programming.
         "trueName" represents device true name.
         """
-        command = "config get devicejsonstring"
-        response = self.send(command)
-        response = response.replace("device json string:", "").strip()
-
-        try:
-            return json.loads(response)
-        except:
-            return []
+        return self.send("config get devicejsonstring")
 
     def get_scene_json(self):
         """Obtains all scene information.
