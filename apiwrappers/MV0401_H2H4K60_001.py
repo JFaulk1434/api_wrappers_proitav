@@ -37,7 +37,7 @@ class MV0401_H2H4K60_001:
             return self.connect()
         return True
 
-    def send_command(self, message: str) -> str:
+    def send(self, message: str) -> str:
         """
         Sends a message to the Controller and returns the response, ensuring the device is connected.
         Includes a retry mechanism if the initial send fails due to a connection issue.
@@ -1687,3 +1687,9 @@ class MV0401_H2H4K60_001:
           description: Colorimetry is set to follow sink"""
 
         return self.send("GET VIDOUT_CR")
+
+
+if __name__ == "__main__":
+    mv = MV0401_H2H4K60_001("192.168.50.170")
+    print(mv.get_ip())
+    print(mv.get_firmware())

@@ -251,3 +251,7 @@ class AMP_100:
         Sends the command to set the volume on the device.
         """
         self.set_dsp_volume("out", self.output, self.volume)
+
+
+if __name__ == "__main__":
+    amp = AMP_100(ip="192.168.50.170")

@@ -10,13 +10,17 @@ logger = logging.getLogger(__name__)
 # Helpers
 def string_to_dict(message: str) -> dict:
     # Splitting by lines and then by ':'
-    data_lines = message.strip().split("\n")
-    data_dict = {}
-    for line in data_lines:
-        key, value = line.split(": ")
-        data_dict[key.strip()] = value.strip()
+    try:
+        data_lines = message.strip().split("\n")
+        data_dict = {}
+        for line in data_lines:
+            key, value = line.split(": ")
+            data_dict[key.strip()] = value.strip()
 
-    return data_dict
+        return data_dict
+    except Exception as e:
+        print(f"Error converting string to dictionary: {e}")
+        return {}
 
 
 def strip_to_dict(message: str) -> dict:
@@ -29,15 +33,6 @@ def strip_to_dict(message: str) -> dict:
         stripped_string = message
 
     return json.loads(stripped_string)
-
-
-def clean_response(response: str) -> str:
-    """Strips everything before the first '[' or '{' in the response."""
-    start_index = min(response.find("["), response.find("{"))
-    if start_index == -1:
-        logger.error(f"Invalid response format: {response}")
-        return response
-    return response[start_index:]
 
 
 class SC009:
@@ -82,12 +77,18 @@ class SC009:
 
         return wrapper
 
+    def flush(self):
+        """Flushes any pending responses from the buffer."""
+        if self.tn:
+            self.tn.read_very_eager()
+
     @ensure_connection
     def send(self, command):
         """
         Sends a command to the device, ensuring the device is connected.
         """
         try:
+            self.flush()
             self.tn.write(command.encode("ascii") + b"\n")
             response = self.tn.read_until(b"\r\n\r\n")
             return response.decode()
@@ -108,6 +109,18 @@ class SC009:
                 print(f"Error closing Telnet connection: {e}")
             finally:
                 self.tn = None
+
+    def _strip_prefix(self, response):
+        """Strips everything before the first [ or { character."""
+        start_bracket = response.find("[")
+        start_brace = response.find("{")
+        start = min(
+            start_bracket if start_bracket != -1 else float("inf"),
+            start_brace if start_brace != -1 else float("inf"),
+        )
+        if start != float("inf"):
+            return response[start:]
+        return response
 
     def get_version(self) -> dict:
         response = self.send("config get version")
@@ -417,12 +430,12 @@ class SC009:
             command += hostname + " "
         response = self.send(command)
         logger.debug(f"Raw response for device info: {response}")
+        response = self._strip_prefix(response)
 
-        cleaned_response = clean_response(response)
         try:
-            return json.loads(cleaned_response)
+            return json.loads(response)
         except json.JSONDecodeError as e:
-            logger.error(f"JSON decoding error: {e}, response: {cleaned_response}")
+            logger.error(f"JSON decoding error: {e}, response: {response}")
             return {}
 
     def get_device_status(self, *hostnames) -> dict:
@@ -439,11 +452,11 @@ class SC009:
         response = self.send(command)
         logger.debug(f"Raw response for device status: {response}")
 
-        cleaned_response = clean_response(response)
+        response = self._strip_prefix(response)
         try:
-            return json.loads(cleaned_response)
+            return json.loads(response)
         except json.JSONDecodeError as e:
-            logger.error(f"JSON decoding error: {e}, response: {cleaned_response}")
+            logger.error(f"JSON decoding error: {e}, response: {response}")
             return {}
 
     def get_device_json(self) -> list:
@@ -460,11 +473,11 @@ class SC009:
         response = self.send("config get devicejsonstring")
         logger.debug(f"Raw response for device json: {response}")
 
-        cleaned_response = clean_response(response)
+        response = self._strip_prefix(response)
         try:
-            return json.loads(cleaned_response)
+            return json.loads(response)
         except json.JSONDecodeError as e:
-            logger.error(f"JSON decoding error: {e}, response: {cleaned_response}")
+            logger.error(f"JSON decoding error: {e}, response: {response}")
             return []
 
     def get_scene_json(self) -> dict:
@@ -483,11 +496,11 @@ class SC009:
         response = self.send(command)
         logger.debug(f"Raw response for scene json: {response}")
 
-        cleaned_response = clean_response(response)
+        response = self._strip_prefix(response)
         try:
-            return json.loads(cleaned_response)
+            return json.loads(response)
         except json.JSONDecodeError as e:
-            logger.error(f"JSON decoding error: {e}, response: {cleaned_response}")
+            logger.error(f"JSON decoding error: {e}, response: {response}")
             return {}
 
     def get_telnet_alias(self):
