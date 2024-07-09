@@ -6,13 +6,15 @@ from telnetlib import Telnet
 
 
 class AMP_100:
-    def __init__(self, **kwargs):
-        self.ip = kwargs.get("ip")
-        self.mac = kwargs.get("mac")
-        self.port = kwargs.get("tel_port")
-        self.tel_pass = kwargs.get("tel_pass").encode("ascii")
-        self.output = kwargs.get("output")
-        self.source = kwargs.get("source")
+    def __init__(self, ip, port=24):
+        self.ip = ip
+        self.port = port
+        # self.ip = kwargs.get("ip")
+        # self.mac = kwargs.get("mac")
+        # self.port = kwargs.get("tel_port")
+        # self.tel_pass = kwargs.get("tel_pass").encode("ascii")
+        # self.output = kwargs.get("output")
+        # self.source = kwargs.get("source")
         self.volume = -12  # Initial volume level, adjust as needed
         self.min_volume = -40
         self.max_volume = 0
@@ -246,12 +248,14 @@ class AMP_100:
         self.volume = new_volume
         self.set_volume()
 
-    def set_volume(self):
+    def set_volume(self, output, volume):
         """
         Sends the command to set the volume on the device.
         """
-        self.set_dsp_volume("out", self.output, self.volume)
+        self.set_dsp_volume("out", output, volume)
 
 
 if __name__ == "__main__":
-    amp = AMP_100(ip="192.168.50.170")
+    amp = AMP_100("192.168.50.148")
+    print(amp.get_amp_mode())
+    print(amp.get_ipaddr())
