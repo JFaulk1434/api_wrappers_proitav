@@ -599,9 +599,12 @@ class SC009:
         return self.send(command)
 
     # CEC
-    def cec(self, command, host):
+    def cec(self, command, *hosts):
         """Send CEC Command to device"""
-        command = f'cec "{command}" {host}'
+        command = f'cec "{command}" '
+
+        for host in hosts:
+            command += host + " "
         return self.send(command)
 
     def find_me(self, seconds, *hosts):
