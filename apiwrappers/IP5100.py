@@ -959,6 +959,16 @@ class Decoder5100(IP5100):
         """Set the video wall delay kick of the device."""
         return self.send(f"e e_vw_delay_kick_{value}")
 
+    def set_vidout_hdmi(self, value):
+        """Set the HDMI to disconnect when encoder is disconnected.
+        value: {
+            y: HDMI will be disconnected when encoder is disconnected
+            n: HDMI will not be disconnected when encoder is disconnected and show the logo
+            }"""
+        return self.send(
+            f"astparam s v_turn_off_screen_on_pwr_save {value}; astparam save; reboot"
+        )
+
 
 if __name__ == "__main__":
     encoder = Encoder5100("10.0.50.2")

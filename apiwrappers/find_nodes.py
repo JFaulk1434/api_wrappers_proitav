@@ -126,9 +126,4 @@ def search_nodes(query_port=QUERY_PORT, regular_expression=None, sort_key="HOSTN
 if __name__ == "__main__":
     from time import sleep
 
-    while True:
-        found_devices = search_nodes(sort_key="HOSTNAME")  # Sort by HOSTNAME
-        for device in found_devices:
-            print(device)
-
-        sleep(10)
+    print(search_nodes())

@@ -6,6 +6,7 @@ HDBaseT 4x2 Syscomtec Matrix
 
 import pexpect
 import serial
+import time
 
 
 class SCT_MXKVM42_H2U3:
@@ -472,11 +473,7 @@ class SCT_MXKVM42_H2U3:
 
 if __name__ == "__main__":
     SCT_MXKVM42_H2U3.help()
-    ip = input("What is the IP address of the Matrix? : ")
-    password = input("What is the password? : ")
-    matrix = SCT_MXKVM42_H2U3("Telnet", ip, password)
-    print(matrix.get_firmware())
-    print(matrix.get_hdcp_input("i01"))
-    print(matrix.get_audio_format("i01"))
-    print(matrix.get_ip_address())
-    print(matrix.get_api())
+    matrix = SCT_MXKVM42_H2U3("Telnet", "10.0.30.4", "admin")
+    matrix.set_switch_input_output("i01", "o01")
+    time.sleep(3)
+    matrix.set_switch_input_output("i02", "o01")

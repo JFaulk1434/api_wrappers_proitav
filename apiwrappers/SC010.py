@@ -1,8 +1,9 @@
-"""Python Wrapper for SC009 using Telnet"""
+"""Python Wrapper for SC010 using Telnet"""
 
 from telnetlib import Telnet
 import json
 import logging
+from find_nodes import search_nodes
 
 logger = logging.getLogger(__name__)
 
@@ -24,28 +25,27 @@ def string_to_dict(message: str) -> dict:
 
 
 def strip_to_dict(message: str) -> dict:
-    brace_position = message.find("{")
+    try:
+        brace_position = message.find("{")
 
-    # Slice the string from the brace to the end if '{' is found
-    if brace_position != -1:
-        stripped_string = message[brace_position:]
-    else:
-        stripped_string = message
+        # Slice the string from the brace to the end if '{' is found
+        if brace_position != -1:
+            stripped_string = message[brace_position:]
+        else:
+            stripped_string = message
 
-    return json.loads(stripped_string)
+        return json.loads(stripped_string)
+    except Exception as e:
+        print(f"Error converting string to dictionary: {e}")
+        return {}
 
 
-class SC009:
-    def __init__(self, ipaddr, port=23) -> None:
-        self.ip = ipaddr
-        self.port = port
+class SC010:
+    def __init__(self, ip) -> None:
+        self.ip = ip
+        self.port = 23
         self.tn = None
-        self.url = f"http://{self.ip}"
         self.connect()
-        self.api_version = None
-        self.system_version = None
-
-        self.get_version()
 
     def connect(self):
         """
@@ -59,7 +59,7 @@ class SC009:
             # print("Connected")
             return True
         except Exception as e:
-            print(f"Failed to connect to SC009 at {self.ip}. Error: {e}")
+            print(f"Failed to connect to SC010 at {self.ip}. Error: {e}")
             self.tn = None  # Reset the connection
             return False
 
@@ -490,7 +490,7 @@ class SC009:
         "rxArray" describes RX in a form of two-dimensional array in a scene.
         "sequence" in a scene represents the position of video wall which contains this scene , which starts with 1. If "sequence" is 0, it means that this video wall is not arranged in specific order. In this case, you can put it in a position based on programming.
         "txListArray" describesTX in a form of two-dimensional array in a scene.
-        "vwConfigList" represents the configuration of combination screen in a scene. "name" represents combination screen name, which uses "scene name_ combination screen name" in IP controller (SC009)."pos_row" represents the start place of the first row."pos_col" represents the start place of the first column."row_count" represents the number of rows in combination screen."col_count"represents the number of columns in combination screen.
+        "vwConfigList" represents the configuration of combination screen in a scene. "name" represents combination screen name, which uses "scene name_ combination screen name" in IP controller (SC010)."pos_row" represents the start place of the first row."pos_col" represents the start place of the first column."row_count" represents the number of rows in combination screen."col_count"represents the number of columns in combination screen.
         """
         command = "config get scenejsonstring"
         response = self.send(command)
@@ -696,15 +696,22 @@ class SC009:
 
 
 if __name__ == "__main__":
-    controller = SC009("10.0.50.200")
-    commands = [
-        controller.get_version(),
-        controller.get_system_info(),
-        controller.get_device_info(),
-        controller.get_device_json(),
-        controller.get_devicelist(),
-        controller.get_ipsettings(),
-    ]
-    for command in commands:
-        print(command)
-        print("\n")
+    controller = SC010("192.168.50.165")
+    devices = controller.get_devicelist()
+    print(controller.get_device_status("BrightSign1"))
+    print(controller.get_device_status("BR5-6000"))
+
+    # print(controller.get_device_status(devices[0]))
+    # print(controller.get_device_info("BR5-6000"))
+
+    # commands = [
+    #     controller.get_version(),
+    #     controller.get_system_info(),
+    #     controller.get_device_info(),
+    #     controller.get_device_json(),
+    #     controller.get_devicelist(),
+    #     controller.get_ipsettings(),
+    # ]
+    # for command in commands:
+    #     print(command)
+    #     print("\n")
