@@ -222,7 +222,7 @@ class SC010:
             command = f"config set device ip {hostname} {type}"
         return self.send(command)
 
-    def set_device_info(self, *hostnames, command):
+    def set_device_info(self, command, *hostnames):
         """
         Changes a device's one or multiple working parameters in key=value format.
         You can change parameters for multiple devices at one time.
