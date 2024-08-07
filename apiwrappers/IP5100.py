@@ -971,8 +971,16 @@ class Decoder5100(IP5100):
 
 
 if __name__ == "__main__":
-    encoder = Encoder5100("10.0.50.2")
+    # encoder = Encoder5100("10.0.50.2")
     in1 = "SET SW in1 out"
     in2 = "SET SW in2 out"
 
-    print(encoder.send_serial_data("115200-8n1", in1))
+    # print(encoder.send_serial_data("115200-8n1", in1))
+    decoder = Decoder5100("192.168.50.144")
+    decoder2 = Decoder5100("192.168.50.147")
+    # decoder.cec_onetouch_play()
+    # decoder2.cec_onetouch_play()
+    decoder.cec_send("40:04")
+    decoder2.cec_send("40:04")
+    # decoder.cec_send("40 04")
+    # decoder.cec_send("40:04")

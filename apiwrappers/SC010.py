@@ -3,7 +3,7 @@
 from telnetlib import Telnet
 import json
 import logging
-from find_nodes import search_nodes
+from time import sleep
 
 logger = logging.getLogger(__name__)
 
@@ -222,21 +222,23 @@ class SC010:
             command = f"config set device ip {hostname} {type}"
         return self.send(command)
 
-    def set_device_info(self, *hostnames, **info):
-        """Changes a device's one or multiple working parameters in key=value format. You can change parameters for multiple devices at one time.
+    def set_device_info(self, *hostnames, command):
+        """
+        Changes a device's one or multiple working parameters in key=value format.
+        You can change parameters for multiple devices at one time.
+
         ex: set_device_info(
-            hostnames=IPD5100-341B22800BCD,
-            hostnames=IPD5100-341B22800BCC )
+            "IPD5100-341B22800BCD",
+            "IPD5100-341B22800BCC",
+            command="sinkpower.mode=4004"
+        )
+
         Note:
         hostname1 and hostname2 are device names.
-        Key is parameter name and value is its value. For more information, see 3.1 Device Info section of IP Controller API command guide
-        hostnames = ex: IPD5100-341B22800BCD
-        info = key=value pairs
-            key = ex: mic_volume, audio.mic1.gain, audio.lineout1.volume
-            value = ex: 20
+        command is a string in key=value format.
         """
-        command = f"config set device info {' '.join([f'{k}={v}' for k, v in info.items()])} {' '.join(hostnames)}"
-        return self.send(command)
+        full_command = f"config set device info {command} {' '.join(hostnames)}"
+        return self.send(full_command)
 
     def set_device_audio(self, type, *hostnames):
         """This command is only used for IPE5000,
@@ -357,7 +359,7 @@ class SC010:
 
     def set_scene(self, scene):
         """Set scene"""
-        self.send(f"scene active {scene}")
+        return self.send(f"scene active {scene}")
 
     def get_devicelist(self) -> list:
         """Get all online device names"""
@@ -699,9 +701,22 @@ class SC010:
 
 if __name__ == "__main__":
     controller = SC010("192.168.50.165")
-    devices = controller.get_devicelist()
-    print(controller.get_device_status("BrightSign1"))
-    print(controller.get_device_status("BR5-6000"))
+    decoders_6000 = "TV1-6000 TV2-6000 TV3-6000 TV4-6000"
+    decoders_5100 = "TV1 TV2 TV3 TV4"
+    controller.cec("ff82", decoders_5100)  # Power On
+    sleep(20)
+    controller.cec("ff440b", decoders_5100)  # Exit
+    sleep(1)
+    controller.cec("ff440d", decoders_5100)  # Back
+    sleep(1)
+    controller.cec("ff4403", decoders_5100)  # Left
+    sleep(5)
+    controller.cec("ff36", decoders_5100)  # Power Off
+
+    # devices = controller.get_devicelist()
+    # print(controller.get_device_status("BrightSign1"))
+    # print(controller.get_device_status("BR5-6000"))
+    # print(controller.set_scene("5100-wall"))
 
     # print(controller.get_device_status(devices[0]))
     # print(controller.get_device_info("BR5-6000"))

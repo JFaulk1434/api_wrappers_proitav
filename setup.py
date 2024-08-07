@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="apiwrappers",
-    version="0.5",
+    version="1.1.0",
     packages=find_packages(),
     description="API Wrapper for ProITAV Products",
     author="Justin Faulk",
