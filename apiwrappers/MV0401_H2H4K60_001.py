@@ -57,7 +57,7 @@ class MV0401_H2H4K60_001:
                 response = stdout.strip(">")
                 # if response.startswith(message):
                 #     response = response[len(message) :].strip()
-                return stdout
+                return response
             except Exception as e:
                 print(
                     f"Attempt {attempt + 1}: Failed to send command to {self.ip}. Error: {e}"

@@ -1,6 +1,5 @@
 "Return a sorted list of all units found on the network"
 
-
 import socket
 import select
 import struct
@@ -124,6 +123,6 @@ def search_nodes(query_port=QUERY_PORT, regular_expression=None, sort_key="HOSTN
 
 # Example usage of modified function
 if __name__ == "__main__":
-    from time import sleep
-
-    print(search_nodes())
+    nodes = search_nodes()
+    for node in nodes:
+        print(node)

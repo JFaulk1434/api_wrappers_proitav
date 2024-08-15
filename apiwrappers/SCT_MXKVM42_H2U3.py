@@ -126,7 +126,7 @@ class SCT_MXKVM42_H2U3:
         response = VIDSW out in
         in = {i00, i01, i02, i03, i04}
         out = {o01, o02}"""
-        command = f"GET VIDSW all"
+        command = "GET VIDSW all"
         response = self.send_command(command)
         return response
 

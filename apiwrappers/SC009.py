@@ -411,7 +411,7 @@ class SC009:
         If you use a device name to obtain its alias which is not set, response is "NULL".
         If config get name is used without parameters, response is all device names and their aliases.
         """
-        if device == None:
+        if device is None:
             command = "config get name"
         else:
             command = f"config get name {device}"
@@ -427,7 +427,7 @@ class SC009:
         The developer must consider this factor when programming the caller’s code.
         Working parameters use Key:Value format. Key is a parameter name and value is its value. For more information, see 3.1 Device Info section.
         """
-        command = f"config get device info "
+        command = "config get device info "
         for hostname in hostnames:
             command += hostname + " "
         response = self.send(command)
@@ -559,7 +559,7 @@ class SC009:
         return self.send(command)
 
     def disconnect_all(self):
-        return self.send(f"matrix set NULL ALL_RX")
+        return self.send("matrix set NULL ALL_RX")
 
     def system_factory_restore(self):
         """Resets Controller to factory settings

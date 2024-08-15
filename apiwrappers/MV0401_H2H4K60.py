@@ -13,7 +13,6 @@ Key Features:
 
 """
 
-
 import serial
 
 
@@ -265,30 +264,6 @@ class MV0401_H2H4K60:
         prm3 = {1,2,3,4}//bottom of the right channel
         """
         command = "GET MASTER_SRC"
-        response = self.send_command(command)
-        return response
-
-    def set_audio_source(self, prm):
-        """Set which source outputs audio
-        prm = {1,2,3,4}
-        1: hdmi1
-        2: hdmi2
-        3: hdmi3
-        4: hdmi4
-        """
-        command = f"SET AUDOUT_SRC {prm}"
-        response = self.send_command(command)
-        return response
-
-    def get_audio_source(self):
-        """Returns which source outputs audio
-        prm = {1,2,3,4}
-        1: hdmi1
-        2: hdmi2
-        3: hdmi3
-        4: hdmi4
-        """
-        command = "GET AUDOUT_SRC"
         response = self.send_command(command)
         return response
 

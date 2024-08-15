@@ -25,8 +25,8 @@ class MV0401_H2H4K60_TCP(MV0401_H2H4K60):
         time.sleep(0.25)
 
         if not data:
-            logging.info(f"No response received")  # Log lack of response
-            print(f"No response received")
+            logging.info("No response received")  # Log lack of response
+            print("No response received")
             return "No response received"
         else:
             data_decoded = data.decode("ascii").strip()

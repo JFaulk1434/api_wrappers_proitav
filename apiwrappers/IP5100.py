@@ -273,7 +273,7 @@ class IP5100:
         """
         Get the login prompt of the device.
         """
-        response = self.send("")
+        self.send("")
 
     def dump(self):
         """
@@ -374,9 +374,9 @@ class IP5100:
         1: Enabled
         """
         if status == 0:
-            return self.send(f"astparam s hdcp_enable n")
+            return self.send("astparam s hdcp_enable n")
         else:
-            return self.send(f"astparam s hdcp_enable y")
+            return self.send("astparam s hdcp_enable y")
 
     def set_addon(self, value):
         """
@@ -797,7 +797,7 @@ class Decoder5100(IP5100):
         """
         Disable Video wall
         """
-        self.send(f"e e_vw_enable_0_0_0_0")
+        self.send("e e_vw_enable_0_0_0_0")
         self.send("e e_vw_enable_0_0_0_0_2")
 
     def set_vwall_rotate(self, value):
@@ -908,6 +908,7 @@ class Decoder5100(IP5100):
         measured in mm"""
         command = f"e e_vw_moninfo_{vw}_{ow}_{vh}_{oh}"
         response = self.send(command)
+        return response
         # print(f"Set Monitor Info: {command}\nResponse: {response}")
 
     def set_video_wall_v1(self, rows, columns, row_location, column_location):
@@ -926,6 +927,7 @@ class Decoder5100(IP5100):
 
         command = f"e e_vw_enable_{rows}_{columns}_{row_location}_{column_location}_1"
         response = self.send(command)
+        return response
         # print(f"Enable Video Wall: {command}\nResponse: {response}")
 
     def set_video_wall_v2(self, x_top, y_top, x_bot, y_bot):
@@ -935,6 +937,7 @@ class Decoder5100(IP5100):
         y_bot: Y Bottom"""
         command = f"e e_vw_enable_{x_top}_{y_top}_{x_bot}_{y_bot}_2"
         response = self.send(command)
+        return response
         # print(f"Set Video Wall: {command}\nResponse: {response}")
 
     def set_video_wall_vshift(self, direction, value):
