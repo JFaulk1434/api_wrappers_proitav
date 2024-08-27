@@ -23,15 +23,17 @@ class MS0402_N011:
                     self.tn.set_debuglevel(1)  # Enable debugging output
 
                 # Handle login
-                self.tn.read_until(b"Login:", timeout=5)
-                self.tn.write(self.user.encode("ascii") + b"\n")
-                self.tn.read_until(b"Password:", timeout=5)
-                self.tn.write(self.password.encode("ascii") + b"\n")
+                self.tn.read_until(b"Login:", timeout=1)
+                self.tn.write(self.user.encode("utf-8") + b"\n")
+                print(self.tn.read_until(b"Password:", timeout=1))
+                self.tn.write(self.password.encode("utf-8") + b"\n")
 
                 # Check for login errors and welcome message
                 start_time = time.time()
                 while True:
-                    response = self.tn.read_until(b"\r\n", timeout=5)
+                    response = self.tn.read_until(
+                        b"Welcome to use MS42-Switcher control system", timeout=2
+                    )
 
                     if b"Username or password error" in response:
                         print("Username or password error.")
@@ -568,5 +570,6 @@ class MS0402_N011:
 # Example usage
 if __name__ == "__main__":
     device = MS0402_N011(
-        ip="10.0.50.12", user="admin", password="admin", debug=False, verbose=True
+        ip="192.168.50.181", user="admin", password="admin", debug=True, verbose=True
     )
+    print(device.get_firmware_version())
