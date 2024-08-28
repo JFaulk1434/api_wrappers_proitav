@@ -23,10 +23,13 @@ class MS0402_N011:
                     self.tn.set_debuglevel(1)  # Enable debugging output
 
                 # Handle login
+                self.tn.read_very_eager()
                 self.tn.read_until(b"Login:", timeout=1)
-                self.tn.write(self.user.encode("utf-8") + b"\n")
-                print(self.tn.read_until(b"Password:", timeout=1))
-                self.tn.write(self.password.encode("utf-8") + b"\n")
+                self.tn.write(self.user.encode("ascii") + b"\r\n")
+                self.tn.read_until(b"Password:", timeout=1)
+                print("Received the password prompt")
+                self.tn.write(self.password.encode("ascii") + b"\r\n")
+                self.tn.write(self.password.encode("ascii") + b"\r\n")
 
                 # Check for login errors and welcome message
                 start_time = time.time()
@@ -72,6 +75,8 @@ class MS0402_N011:
                 return connection_status
 
         try:
+            # Flush the telnet buffer before sending the command
+            self.tn.read_very_eager()  # This will clear any pending data in the buffer
             self.tn.write(command.encode("ascii") + b"\n")
             time.sleep(0.5)  # Small delay to allow the command to be processed
 
@@ -107,7 +112,7 @@ class MS0402_N011:
         response = response.replace("Welcome to use MS42-Switcher system", "").strip()
         return response
 
-    def get_firmware_version(self, prm="all"):
+    def get_firmware_version(self, prm="main"):
         """prm = {main, arm, usb_c_video, hdmi, usb_c_cc, hdbt_3.0, cpld, all}"""
         return self.send_command(f"get ver {prm}")
 
