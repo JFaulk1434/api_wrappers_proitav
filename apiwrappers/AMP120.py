@@ -5,7 +5,7 @@ import select
 from telnetlib import Telnet
 
 
-class AMP_100:
+class AMP_120:
     def __init__(self, ip, port=24, output="out2", source="dante"):
         self.ip = ip
         self.port = port
