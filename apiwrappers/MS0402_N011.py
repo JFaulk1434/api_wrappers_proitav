@@ -27,7 +27,7 @@ class MS0402_N011:
                 self.tn.read_until(b"Login:", timeout=1)
                 self.tn.write(self.user.encode("ascii") + b"\r\n")
                 self.tn.read_until(b"Password:", timeout=1)
-                print("Received the password prompt")
+                # print("Received the password prompt")
                 self.tn.write(self.password.encode("ascii") + b"\r\n")
                 self.tn.write(self.password.encode("ascii") + b"\r\n")
 
@@ -44,7 +44,7 @@ class MS0402_N011:
                         return "Username or password error."
 
                     if b"Welcome to use MS42-Switcher control system" in response:
-                        print("Connected successfully.")
+                        # print("Connected successfully.")
                         # Flush the buffer to remove any remaining welcome message data
                         time.sleep(
                             0.5
