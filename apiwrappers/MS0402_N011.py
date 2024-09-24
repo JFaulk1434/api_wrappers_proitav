@@ -78,7 +78,7 @@ class MS0402_N011:
             # Flush the telnet buffer before sending the command
             self.tn.read_very_eager()  # This will clear any pending data in the buffer
             self.tn.write(command.encode("ascii") + b"\n")
-            time.sleep(0.5)  # Small delay to allow the command to be processed
+            time.sleep(0.10)  # Small delay to allow the command to be processed
 
             response = b""
             while True:
@@ -575,6 +575,10 @@ class MS0402_N011:
 # Example usage
 if __name__ == "__main__":
     device = MS0402_N011(
-        ip="192.168.50.181", user="admin", password="admin", debug=True, verbose=True
+        ip="192.168.50.104", user="admin", password="admin", debug=False, verbose=False
     )
     print(device.get_firmware_version())
+    print(device.get_input("OUT1"))
+    print(device.get_input("OUT2"))
+    print(device.get_NIC_status())
+    print(device.get_usbc_dp_mode())

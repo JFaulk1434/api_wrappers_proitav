@@ -6,27 +6,23 @@ from telnetlib import Telnet
 
 
 class AMP_120:
-    def __init__(self, ip, port=24, output="out2", source="dante"):
+    def __init__(self, ip, port=24, output="out2", source="dante", debug=False):
         self.ip = ip
         self.port = port
         self.output = output
         self.source = source
-        # self.ip = kwargs.get("ip")
-        # self.mac = kwargs.get("mac")
-        # self.port = kwargs.get("tel_port")
-        # self.tel_pass = kwargs.get("tel_pass").encode("ascii")
-        # self.output = kwargs.get("output")
-        # self.source = kwargs.get("source")
         self.volume = -12  # Initial volume level, adjust as needed
         self.min_volume = -40
         self.max_volume = 0
         self.volume_step = 3  # Adjust step size as needed
         self.tn = None
+        self.debug = debug
 
     def connect(self):
         if self.tn is None:
             self.tn = Telnet()
-            # self.tn.set_debuglevel(1)  # Enable debug output
+            if self.debug:
+                self.tn.set_debuglevel(1)  # Enable debug output
 
         try:
             self.tn.open(self.ip, self.port, timeout=1)  # Increased timeout
@@ -256,6 +252,18 @@ class AMP_120:
         """
         self.set_dsp_volume("out", self.output, self.volume)
 
+    def get_firmware_version(self):
+        """Get the version of the device"""
+        response = self.send("get ver")
+        return response
+
 
 if __name__ == "__main__":
-    amp = AMP_100(ip="192.168.50.170")
+    amp = AMP_120(ip="192.168.50.148", debug=True)
+    # amp.set_dsp_mute("out", "dante", "off")
+    success = 0
+    for i in range(20):
+        version = amp.get_firmware_version()
+        if version.startswith("VER"):
+            success += 1
+    print(success)

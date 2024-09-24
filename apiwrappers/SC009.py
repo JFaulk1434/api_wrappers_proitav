@@ -701,15 +701,18 @@ class SC009:
 
 
 if __name__ == "__main__":
-    controller = SC009("10.0.50.200")
-    commands = [
-        controller.get_version(),
-        controller.get_system_info(),
-        controller.get_device_info(),
-        controller.get_device_json(),
-        controller.get_devicelist(),
-        controller.get_ipsettings(),
-    ]
-    for command in commands:
-        print(command)
-        print("\n")
+    controller = SC009("192.168.50.200")
+    controller.connect()
+
+    import time
+
+    responses = []
+    start_time = time.time()
+    for i in range(20):
+        responses.append(controller.get_device_json())
+
+    end_time = time.time()
+    print(f"Time taken: {end_time - start_time:.2f} seconds")
+    print("Responses:", len(responses))
+    for response in responses:
+        print(response)
