@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="proitav-api-wrappers",
-    version="1.3.1",
+    version="1.3.2",
     packages=find_packages(),
     description="API Wrapper for ProITAV Products",
     long_description=long_description,
