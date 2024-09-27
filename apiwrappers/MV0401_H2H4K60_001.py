@@ -3,7 +3,7 @@ from telnetlib import Telnet
 import select
 
 
-class MV0401_H2H4K60_001:
+class MV0401_Device:
     """Python wrapper using Telnet control"""
 
     def __init__(self, ip, port=23) -> None:
@@ -1690,6 +1690,6 @@ class MV0401_H2H4K60_001:
 
 
 if __name__ == "__main__":
-    mv = MV0401_H2H4K60_001("192.168.50.170")
+    mv = MV0401_Device("192.168.50.170")
     print(mv.get_ip())
     print(mv.get_firmware())

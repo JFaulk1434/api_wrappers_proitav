@@ -10,7 +10,7 @@ import socket
 logger = logging.getLogger(__name__)
 
 
-class FSC640:
+class FSC640_Device:
     def __init__(
         self,
         ip: str,
@@ -699,7 +699,7 @@ class FSC640:
 if __name__ == "__main__":
     import time
 
-    fsc = FSC640("10.0.40.10")
+    fsc = FSC640_Device("10.0.40.10")
     fsc.connect()
     commands = [
         fsc.get_device_info(),

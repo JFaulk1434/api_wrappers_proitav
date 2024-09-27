@@ -16,7 +16,7 @@ Key Features:
 import serial
 
 
-class MV0401_H2H4K60:
+class MV0401_Device_Serial:
     def __init__(self, device_name=None) -> None:
         """Python Wrapper for MV0401-H2H4K60-000
         Multiview 4k60
@@ -634,6 +634,6 @@ class MV0401_H2H4K60:
 
 if __name__ == "__main__":
     device = "/dev/cu.usbserial-A9UK1ODD"
-    multiview = MV0401_H2H4K60(device)
+    multiview = MV0401_Device_Serial(device)
     multiview.help()
     multiview.get_firmware_ver()

@@ -1,4 +1,4 @@
-from apiwrappers.MV0401_H2H4K60 import MV0401_H2H4K60
+from apiwrappers.MV0401_H2H4K60 import MV0401_Device
 import socket
 import logging
 import time
@@ -7,7 +7,7 @@ import time
 logging.basicConfig(filename="rs232.log", level=logging.INFO)
 
 
-class MV0401_H2H4K60_TCP(MV0401_H2H4K60):
+class MV0401_Device_TCP(MV0401_Device):
     def __init__(self, ip_address="10.0.50.22", port=4999, device_name=None) -> None:
         super().__init__(device_name)
         self.control = "TCP"
@@ -36,7 +36,7 @@ class MV0401_H2H4K60_TCP(MV0401_H2H4K60):
 
 
 if __name__ == "__main__":
-    device = MV0401_H2H4K60_TCP()
+    device = MV0401_Device_TCP()
     device.get_firmware_ver()
     device.get_input_video_info(1)
     device.get_input_video_info(2)

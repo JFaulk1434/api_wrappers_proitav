@@ -3,7 +3,7 @@ import time
 import select
 
 
-class MX0404_N301:
+class MX0404N301_Device:
     """Class to interact with the MX0404-N301 device via Telnet using telnetlib3.
         It provides methods to send different commands to the device.
 
@@ -1107,7 +1107,7 @@ class MX0404_N301:
 if __name__ == "__main__":
     from time import sleep
 
-    matrix = MX0404_N301("10.0.50.23")
+    matrix = MX0404N301_Device("10.0.50.23")
 
     while True:
         matrix.set_vidmode("videowall")

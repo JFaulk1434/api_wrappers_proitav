@@ -105,7 +105,7 @@ def format_pretty_audio_info(audio_info):
         print(f"Error formatting audio info: {e}")
 
 
-class IP5100:
+class IP5100_Device:
     """Python class for controlling the IP5100 encoder/decoder via Telnet."""
 
     def __init__(self, ip, port=24, timeout=3, login="root"):
@@ -544,7 +544,7 @@ class IP5100:
         return response
 
 
-class Encoder5100(IP5100):
+class Encoder5100_Device(IP5100_Device):
     def __init__(self, ip, port=24, timeout=3):
         """Create the class for an Encoder using the IP address, port, and login credentials."""
         super().__init__(ip, port, timeout)
@@ -688,7 +688,7 @@ class Encoder5100(IP5100):
             return "No Audio"
 
 
-class Decoder5100(IP5100):
+class Decoder5100_Device(IP5100_Device):
     def __init__(self, ip, port=24, timeout=3):
         """Create the class for a Decoder using the IP address, port, and login credentials."""
         super().__init__(ip, port, timeout)
@@ -979,8 +979,8 @@ if __name__ == "__main__":
     in2 = "SET SW in2 out"
 
     # print(encoder.send_serial_data("115200-8n1", in1))
-    decoder = Decoder5100("192.168.50.144")
-    decoder2 = Decoder5100("192.168.50.147")
+    decoder = Decoder5100_Device("192.168.50.144")
+    decoder2 = Decoder5100_Device("192.168.50.147")
     # decoder.cec_onetouch_play()
     # decoder2.cec_onetouch_play()
     decoder.cec_send("40:04")

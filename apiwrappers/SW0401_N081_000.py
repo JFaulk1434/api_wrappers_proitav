@@ -8,7 +8,7 @@ import serial
 from time import sleep
 
 
-class SW0401_N081_000:
+class SW0401N081_Device:
     def __init__(self, device_name) -> None:
         """Needs to send RS232 device.
         Example : "/dev/ttyUSB0"
@@ -113,7 +113,7 @@ class SW0401_N081_000:
 
 
 if __name__ == "__main__":
-    switch = SW0401_N081_000("/dev/cu.usbserial-A9UK1ODD")
+    switch = SW0401N081_Device("/dev/cu.usbserial-A9UK1ODD")
     switch.help()
     switch.get_firmware_ver()
 

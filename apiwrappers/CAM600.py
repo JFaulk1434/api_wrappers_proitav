@@ -7,7 +7,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class CAM600:
+class CAM600_Device:
     def __init__(self, host, timeout=5, debug=False, max_retries=3):
         self.host = host
         self.timeout = timeout
@@ -633,5 +633,5 @@ class CAM600:
 
 
 if __name__ == "__main__":
-    cam = CAM600("10.0.110.205", debug=False)
+    cam = CAM600_Device("10.0.110.205", debug=False)
     print(cam.test_connection())

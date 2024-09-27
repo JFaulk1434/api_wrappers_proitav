@@ -1,58 +1,77 @@
-# api_wrappers_proitav
+# ProITAV API Wrappers
 
-A collection of API wrappers to use in Python
+A collection of API wrappers for ProITAV products.
 
-## Setup
+## Installation
 
-run `pip install .` to install this package locally. Must be ran from this directory.
-
-## Importing
-
-`from apiwrappers import IP5100` is an example of how to import into your package.
-
-## Setup for Distribution via Github
-
-Yes, distributing your Python package via GitHub is a very common and effective way to share your code, especially if you want to keep the package semi-private or make it available for easy installation without the formality of PyPI. Here's how you can do it:
-
-### 1. Host Your Package on GitHub
-
-First, ensure your package (with the proper structure and `setup.py` file) is uploaded to a GitHub repository. This includes all necessary source files, a README with installation and usage instructions, and any other relevant documentation.
-
-### 2. Installable via `pip`
-
-Users can install your package directly from GitHub using `pip`. To enable this, you need to ensure your `setup.py` is properly configured as mentioned in previous messages. Here's how someone would install your package directly from GitHub:
+You can install this package directly from PyPI:
 
 ```bash
-pip install git+https://github.com/yourusername/yourrepository.git
+pip install proitav-api-wrappers
 ```
 
-You can also specify a particular branch, tag, or commit if you want to install something other than the main branch:
+For the latest development version, you can install directly from GitHub:
 
 ```bash
-pip install git+https://github.com/yourusername/yourrepository.git@yourbranch
+pip install git+https://github.com/yourusername/proitav-api-wrappers.git
 ```
 
-### 3. Requirements for Easy Installation
+## Usage
 
-- **Public Repository**: If the repository is public, anyone can install the package using the command above.
-- **Private Repository**: If it's private, the user will need to have access to the repository. GitHub can handle authentication via SSH keys or a GitHub access token. Users installing from a private repository will need to configure their environment to authenticate correctly with GitHub.
+Here's an example of how to import and use a wrapper:
 
-### 4. Versioning
+```python
+from proitav_api_wrappers import IP5100
 
-- **Tags for Releases**: Use Git tags to mark releases. This helps users to install specific versions of your package instead of pulling the latest commit from the main branch. You can install using tags like so:
+# Create an instance of the IP5100 wrapper
+ip5100 = IP5100('192.168.1.100')
 
-```bash
-pip install git+https://github.com/yourusername/yourrepository.git@v1.0.0
+# Use the wrapper methods
+ip5100.connect()
+ip5100.get_device_info()
 ```
 
-### 5. Dependency Management
+## Available Wrappers
 
-- **Dependencies**: Ensure that your `setup.py` file accurately lists all dependencies. `pip` will attempt to resolve and install these dependencies automatically when installing your package.
+- IP5100
+- CAM600
+- AMP120
+- SW0401_N081_000
+- MV0401_H2H4K60
+- SC010
+- SC009
+- MS0402_N011
+- FSC640
+- (Add other wrappers as needed)
 
-### 6. Advantages of GitHub Distribution
+## Development
 
-- **Collaboration**: GitHub provides tools for managing issues, pull requests, and version control, which are invaluable for collaborative development.
-- **Accessibility**: Easy for users to see the source code, issues, and how the project evolves over time.
-- **Documentation and Examples**: Host your documentation directly alongside your code, perhaps in the repository wiki or in markdown files.
+To set up the project for development:
 
-Using GitHub to distribute your package is particularly useful for collaborative projects, beta releases, or when you wish to maintain tighter control over who accesses the package. This approach simplifies many aspects of package distribution and user collaboration.
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/JFaulk1434/proitav-api-wrappers.git
+   cd proitav-api-wrappers
+   ```
+
+2. Create a virtual environment and activate it:
+
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+   ```
+
+3. Install the package in editable mode with development dependencies:
+
+   ```bash
+   pip install -e .[dev]
+   ```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Support
+
+If you encounter any problems or have any questions, please open an issue on the GitHub repository.

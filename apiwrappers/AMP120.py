@@ -5,7 +5,7 @@ import select
 from telnetlib import Telnet
 
 
-class AMP_120:
+class AMP120_Device:
     def __init__(self, ip, port=24, output="out2", source="dante", debug=False):
         self.ip = ip
         self.port = port
@@ -259,7 +259,7 @@ class AMP_120:
 
 
 if __name__ == "__main__":
-    amp = AMP_120(ip="192.168.50.148", debug=True)
+    amp = AMP120_Device(ip="192.168.50.148", debug=True)
     # amp.set_dsp_mute("out", "dante", "off")
     success = 0
     for i in range(20):

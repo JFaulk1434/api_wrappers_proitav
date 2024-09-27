@@ -40,7 +40,7 @@ def strip_to_dict(message: str) -> dict:
         return {}
 
 
-class SC010:
+class SC010_Device:
     def __init__(self, ip) -> None:
         self.ip = ip
         self.port = 23
@@ -700,7 +700,7 @@ class SC010:
 
 
 if __name__ == "__main__":
-    controller = SC010("192.168.50.165")
+    controller = SC010_Device("192.168.50.165")
     decoders_6000 = "TV1-6000 TV2-6000 TV3-6000 TV4-6000"
     decoders_5100 = "TV1 TV2 TV3 TV4"
     controller.cec("ff82", decoders_5100)  # Power On

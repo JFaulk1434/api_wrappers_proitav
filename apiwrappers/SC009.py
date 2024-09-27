@@ -35,7 +35,7 @@ def strip_to_dict(message: str) -> dict:
     return json.loads(stripped_string)
 
 
-class SC009:
+class SC009_Device:
     def __init__(self, ipaddr, port=23) -> None:
         self.ip = ipaddr
         self.port = port
@@ -701,7 +701,7 @@ class SC009:
 
 
 if __name__ == "__main__":
-    controller = SC009("192.168.50.200")
+    controller = SC009_Device("192.168.50.200")
     controller.connect()
 
     import time

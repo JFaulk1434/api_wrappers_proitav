@@ -2,7 +2,7 @@ from telnetlib import Telnet
 import time
 
 
-class MS0402_N011:
+class MS0402N011_Device:
     def __init__(
         self, ip, port=23, user="admin", password="admin", debug=False, verbose=False
     ):
@@ -574,7 +574,7 @@ class MS0402_N011:
 
 # Example usage
 if __name__ == "__main__":
-    device = MS0402_N011(
+    device = MS0402N011_Device(
         ip="192.168.50.104", user="admin", password="admin", debug=False, verbose=False
     )
     print(device.get_firmware_version())
