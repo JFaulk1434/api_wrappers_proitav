@@ -60,6 +60,10 @@ def create_new_tag(new_version):
     run_command(f"git push origin v{new_version}")
 
 
+def git_status():
+    return run_command("git status --porcelain")
+
+
 def main():
     if len(sys.argv) != 2 or sys.argv[1] not in ["major", "minor", "patch"]:
         print("Usage: python publish.py [major|minor|patch]")
@@ -71,9 +75,14 @@ def main():
 
     print(f"Updating version from {current_version} to {new_version}")
 
-    run_command("git add .")
-    run_command(f'git commit -m "Prepare release {new_version}"')
-    run_command("git push origin main")
+    # Check if there are any changes to commit
+    status = git_status()
+    if status:
+        run_command("git add .")
+        run_command(f'git commit -m "Prepare release {new_version}"')
+        run_command("git push origin main")
+    else:
+        print("No changes to commit. Proceeding with tag creation.")
 
     create_new_tag(new_version)
 
