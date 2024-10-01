@@ -1,15 +1,22 @@
 import subprocess
 import sys
 import re
+import os
 
 
 def get_current_version():
-    with open("setup.py", "r") as f:
-        content = f.read()
-        match = re.search(r'version="(\d+\.\d+\.\d+)"', content)
-        if match:
-            return match.group(1)
-    raise ValueError("Version not found in setup.py")
+    try:
+        # Use git to get the latest tag
+        version = (
+            subprocess.check_output(["git", "describe", "--tags", "--abbrev=0"])
+            .decode()
+            .strip()
+        )
+        # Remove the 'v' prefix if it exists
+        return version[1:] if version.startswith("v") else version
+    except subprocess.CalledProcessError:
+        # If there are no tags yet, return a default version
+        return "0.0.0"
 
 
 def update_version(current_version, release_type):
@@ -48,6 +55,11 @@ def run_command(command):
     return output.decode().strip()
 
 
+def create_new_tag(new_version):
+    run_command(f'git tag -a v{new_version} -m "Release version {new_version}"')
+    run_command(f"git push origin v{new_version}")
+
+
 def main():
     if len(sys.argv) != 2 or sys.argv[1] not in ["major", "minor", "patch"]:
         print("Usage: python publish.py [major|minor|patch]")
@@ -58,14 +70,12 @@ def main():
     new_version = update_version(current_version, release_type)
 
     print(f"Updating version from {current_version} to {new_version}")
-    update_setup_py(new_version)
 
-    run_command("git add setup.py")
-    run_command(f'git commit -m "Bump version to {new_version}"')
+    run_command("git add .")
+    run_command(f'git commit -m "Prepare release {new_version}"')
     run_command("git push origin main")
 
-    run_command(f'git tag -a v{new_version} -m "Release version {new_version}"')
-    run_command(f"git push origin v{new_version}")
+    create_new_tag(new_version)
 
     print(f"Version {new_version} has been released!")
 
